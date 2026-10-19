@@ -163,8 +163,12 @@ export const RegistryForm: React.FC = () => {
       // can rasterize with the fallback font still showing.
       await document.fonts.ready;
       const { default: html2canvas } = await import('html2canvas');
-      const canvas = await html2canvas(node, { backgroundColor: null, useCORS: true, scale: 2 });
-      return canvas.toDataURL('image/webp', 0.85);
+      // The node is already a full 760x976 design-space copy, so scale 1 is
+      // plenty for this archival snapshot (downloads re-render at higher res
+      // on the view page). Keeping it small matters because this gets encrypted
+      // and base64'd, which roughly doubles its size before upload.
+      const canvas = await html2canvas(node, { backgroundColor: null, useCORS: true, scale: 1 });
+      return canvas.toDataURL('image/webp', 0.8);
     } catch (err) {
       console.error('Certificate snapshot failed, continuing without it', err);
       return null;

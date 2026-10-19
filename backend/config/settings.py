@@ -75,7 +75,38 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CORS_ALLOW_ALL_ORIGINS = True
+# CORS: allowlist instead of allow-all. The production domain + local dev are
+# always allowed; the regex covers this project's Vercel preview deployments.
+CORS_ALLOWED_ORIGINS = [
+    o.strip()
+    for o in os.getenv(
+        'CORS_ALLOWED_ORIGINS',
+        'http://localhost:3000,http://127.0.0.1:3000,https://lameridian.vercel.app',
+    ).split(',')
+    if o.strip()
+]
+CORS_ALLOWED_ORIGIN_REGEXES = [r'^https://usemeridian-[a-z0-9-]+\.vercel\.app$']
+
+# --- Security hardening ---
+# Render terminates TLS at its proxy and forwards this header; without it Django
+# would think requests are plain HTTP and the SSL redirect below would loop.
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
+X_FRAME_OPTIONS = 'DENY'
+
+if not DEBUG:
+    # Note: no SECURE_SSL_REDIRECT - Render already forces HTTPS at its edge,
+    # and a Django-level redirect can trip up platform health checks.
+    SECURE_HSTS_SECONDS = 63072000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+
+# Cap request bodies. The archival snapshot can be up to ~3MB; 6MB leaves headroom
+# while still rejecting oversized-payload abuse.
+DATA_UPLOAD_MAX_MEMORY_SIZE = 6 * 1024 * 1024
 
 ROOT_URLCONF = 'config.urls'
 
@@ -113,6 +144,22 @@ else:
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
+
+
+# Cache: Redis in production (shared across instances for caching + rate limiting),
+# falling back to per-process local memory when REDIS_URL isn't set (local dev, or
+# if the Redis instance hasn't been provisioned - nothing breaks either way).
+REDIS_URL = os.getenv('REDIS_URL')
+if REDIS_URL:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django_redis.cache.RedisCache',
+            'LOCATION': REDIS_URL,
+            'OPTIONS': {'CLIENT_CLASS': 'django_redis.client.DefaultClient'},
+        }
+    }
+else:
+    CACHES = {'default': {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'}}
 
 
 # Password validation
@@ -155,15 +202,5 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 STORAGES = {
     'staticfiles': {
         'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
-    },
-}
-
-
-# Email
-# https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
-
-MAILERS = {
-    'default': {
-        'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }

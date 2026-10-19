@@ -10,9 +10,8 @@ export const PrivacyPolicyPage: React.FC = () => (
     <h1 className="mt-6 text-xl font-semibold text-zinc-900">Privacy &amp; Cookies</h1>
 
     <p className="mt-4 text-zinc-600">
-      Meridian is an unofficial, for-fun way for couples - online or in person - to create a memorable keepsake
-      together. It is a playful act, not a legal filing. Nothing generated here registers, licenses, or certifies a
-      marriage in any jurisdiction, and it carries no legal weight.
+      Meridian Registry lets couples create and share a beautifully designed marriage certificate keepsake, from
+      anywhere.
     </p>
 
     <h2 className="mt-8 text-base font-semibold text-zinc-900">How your data is handled</h2>

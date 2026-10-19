@@ -23,6 +23,21 @@ services:
         fromDatabase:
           name: usemeridian-db
           property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: usemeridian-cache
+          property: connectionString
+      - key: CORS_ALLOWED_ORIGINS
+        value: "https://lameridian.vercel.app"
+
+  # Shared cache for GET-response caching and cross-instance rate limiting.
+  # The app falls back to local-memory cache if this isn't provisioned, so it's
+  # safe to omit; provisioning it just makes caching/limits work across instances.
+  - type: keyvalue
+    name: usemeridian-cache
+    plan: free
+    ipAllowList: []
 
 databases:
   - name: usemeridian-db

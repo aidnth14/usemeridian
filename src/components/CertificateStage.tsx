@@ -51,7 +51,9 @@ export const CertificateStage: React.FC<Props> = ({ left, top, scale, seal, over
       className={clsx('absolute left-1/2 top-1/2 select-none opacity-65', interactive && 'cursor-grab touch-none')}
       style={{ width: SEAL_SIZE, height: SEAL_SIZE, transform: sealDesignTransform(seal) }}
     />
-    <div className="absolute inset-0">{overlay}</div>
+    {/* pointer-events-none so drag/pinch gestures reach the seal underneath -
+        without it this transparent layer swallows every pointer event. */}
+    <div className="pointer-events-none absolute inset-0">{overlay}</div>
   </div>
 );
 

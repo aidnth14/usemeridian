@@ -21,8 +21,8 @@ export const CookieConsent: React.FC = () => {
     <div className="fixed inset-x-0 bottom-0 z-40 border-t border-zinc-200 bg-white px-4 py-4 shadow-[0_-4px_16px_rgba(0,0,0,0.06)] sm:px-6">
       <div className="mx-auto flex max-w-2xl flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-xs text-zinc-600">
-          This site is a fun, unofficial keepsake generator - not a legal document service. It uses local storage to
-          remember this preference. See our{' '}
+          We use local storage to remember this preference. Your certificate details are encrypted in your browser
+          before they're ever sent. See our{' '}
           <Link to="/privacy" className="underline underline-offset-2">
             Privacy &amp; Cookies notice
           </Link>
