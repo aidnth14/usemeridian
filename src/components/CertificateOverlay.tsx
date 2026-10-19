@@ -83,7 +83,7 @@ export const CertificateOverlay: React.FC<{ values: Values; certKey?: string; sh
         <div className="grid grid-cols-2 gap-x-[6%] text-left">
           <div className="border-t border-slate-400 pt-[10px]">
             <p
-              className={groomSignature?.trim() ? 'truncate text-[28px] leading-[1.3] text-slate-800 sm:text-[34px]' : 'text-[10px] italic text-slate-300 sm:text-[12px]'}
+              className={groomSignature?.trim() ? 'overflow-visible whitespace-nowrap text-[20px] leading-[1.4] text-slate-800 sm:text-[24px]' : 'text-[10px] italic text-slate-300 sm:text-[12px]'}
               style={groomSignature?.trim() ? { fontFamily: "'Dalton White', cursive" } : undefined}
             >
               {groomSignature?.trim() || 'Groom signature'}
@@ -94,7 +94,7 @@ export const CertificateOverlay: React.FC<{ values: Values; certKey?: string; sh
           </div>
           <div className="border-t border-slate-400 pt-[10px]">
             <p
-              className={brideSignature?.trim() ? 'truncate text-[28px] leading-[1.3] text-slate-800 sm:text-[34px]' : 'text-[10px] italic text-slate-300 sm:text-[12px]'}
+              className={brideSignature?.trim() ? 'overflow-visible whitespace-nowrap text-[20px] leading-[1.4] text-slate-800 sm:text-[24px]' : 'text-[10px] italic text-slate-300 sm:text-[12px]'}
               style={brideSignature?.trim() ? { fontFamily: "'Dalton White', cursive" } : undefined}
             >
               {brideSignature?.trim() || 'Bride signature'}
@@ -110,9 +110,12 @@ export const CertificateOverlay: React.FC<{ values: Values; certKey?: string; sh
 };
 
 // Convenience wrapper for the live editor, which reads from RegistryFormContext.
+// previewMeta is only set briefly right before a snapshot capture, so the QR
+// code/key number appear in the image even though no certificate exists yet
+// at that point otherwise.
 export const LiveCertificateOverlay: React.FC = () => {
-  const { values } = useRegistryForm();
-  return <CertificateOverlay values={values} />;
+  const { values, previewMeta } = useRegistryForm();
+  return <CertificateOverlay values={values} certKey={previewMeta?.certKey} shareUrl={previewMeta?.shareUrl} />;
 };
 
 export default CertificateOverlay;

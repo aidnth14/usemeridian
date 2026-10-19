@@ -19,11 +19,18 @@ class Certificate(models.Model):
     seal_scale = models.FloatField(default=1)
     seal_rotation = models.FloatField(default=0)
 
-    # Fernet-encrypted JSON blobs of the groom/bride fields.
+    # Opaque ciphertext. For is_client_encrypted=True certificates (everything
+    # created going forward), this is AES-GCM ciphertext encrypted in the
+    # browser with a key that only ever lives in the share link's URL fragment -
+    # the server stores and returns it as-is and has no way to decrypt it.
+    # Certificates created before this existed (is_client_encrypted=False) used
+    # server-side Fernet encryption instead; kept working for backward compat.
     groom_data = models.TextField()
     bride_data = models.TextField()
+    is_client_encrypted = models.BooleanField(default=False)
 
-    # data: URL (webp), captured client-side via html2canvas at generation time.
+    # data: URL (webp) captured via html2canvas, encrypted the same way as
+    # groom_data/bride_data for client_encrypted certificates.
     # Nullable - certificates created before this field existed have none.
     image_data = models.TextField(null=True, blank=True)
 

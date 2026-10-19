@@ -1,4 +1,5 @@
 import json
+import re
 
 from django.db import IntegrityError
 from django.http import JsonResponse
@@ -7,6 +8,9 @@ from django.views.decorators.http import require_http_methods
 
 from .models import Certificate, CertificateOrigin
 from . import services
+
+# 10 digits + 6 digits + 4 uppercase letters, matching generateCertificateId() in crypto.ts
+CERT_ID_RE = re.compile(r'^\d{16}[A-Z]{4}$')
 
 
 @csrf_exempt
@@ -17,21 +21,28 @@ def create_certificate(request):
     except json.JSONDecodeError:
         return JsonResponse({'error': 'invalid JSON body'}, status=400)
 
-    groom = payload.get('groom')
-    bride = payload.get('bride')
+    groom_cipher = payload.get('groomCipher')
+    bride_cipher = payload.get('brideCipher')
     seal = payload.get('seal') or {}
-    image = payload.get('image')
-    if not isinstance(groom, dict) or not isinstance(bride, dict):
-        return JsonResponse({'error': 'groom and bride objects are required'}, status=400)
-    if image is not None:
-        if not isinstance(image, str) or not image.startswith('data:image/'):
-            return JsonResponse({'error': 'image must be a data: URL'}, status=400)
-        if len(image) > 3_000_000:
+    image_cipher = payload.get('imageCipher')
+    client_id = payload.get('id')
+
+    if not isinstance(groom_cipher, str) or not isinstance(bride_cipher, str):
+        return JsonResponse({'error': 'groomCipher and brideCipher strings are required'}, status=400)
+    if image_cipher is not None:
+        if not isinstance(image_cipher, str):
+            return JsonResponse({'error': 'imageCipher must be a string'}, status=400)
+        if len(image_cipher) > 3_000_000:
             return JsonResponse({'error': 'image too large'}, status=400)
+    if client_id is not None and not CERT_ID_RE.match(client_id):
+        return JsonResponse({'error': 'invalid id format'}, status=400)
 
     cert = None
-    for _ in range(5):
-        cert_id = services.generate_id()
+    attempts = 1 if client_id else 5
+    for _ in range(attempts):
+        # The client pre-generates the id so it can bake the correct QR code/key
+        # number into the snapshot before the certificate exists server-side.
+        cert_id = client_id or services.generate_id()
         try:
             cert = Certificate.objects.create(
                 id=cert_id,
@@ -40,12 +51,15 @@ def create_certificate(request):
                 seal_y=float(seal.get('y', 0)),
                 seal_scale=float(seal.get('scale', 1)),
                 seal_rotation=float(seal.get('rotation', 0)),
-                groom_data=services.encrypt_person(groom),
-                bride_data=services.encrypt_person(bride),
-                image_data=image,
+                groom_data=groom_cipher,
+                bride_data=bride_cipher,
+                image_data=image_cipher,
+                is_client_encrypted=True,
             )
             break
         except IntegrityError:
+            if client_id:
+                return JsonResponse({'error': 'id already exists, please retry'}, status=409)
             continue
 
     if cert is None:
@@ -67,13 +81,7 @@ def get_certificate(request, cert_id):
     except Certificate.DoesNotExist:
         return JsonResponse({'error': 'certificate not found'}, status=404)
 
-    try:
-        groom = services.decrypt_person(cert.groom_data)
-        bride = services.decrypt_person(cert.bride_data)
-    except ValueError as exc:
-        return JsonResponse({'error': str(exc)}, status=500)
-
-    return JsonResponse({
+    base = {
         'id': cert.id,
         'key': cert.cert_key,
         'certificateTemplate': cert.certificate_template,
@@ -84,8 +92,31 @@ def get_certificate(request, cert_id):
             'scale': cert.seal_scale,
             'rotation': cert.seal_rotation,
         },
+        'createdAt': cert.created_at.isoformat(),
+    }
+
+    if cert.is_client_encrypted:
+        # The server never had the key and cannot decrypt this - hand back
+        # the raw ciphertext for the client to decrypt with the fragment key.
+        return JsonResponse({
+            **base,
+            'encrypted': True,
+            'groomCipher': cert.groom_data,
+            'brideCipher': cert.bride_data,
+            'imageCipher': cert.image_data,
+        })
+
+    # Legacy certificates created before client-side encryption existed.
+    try:
+        groom = services.decrypt_person(cert.groom_data)
+        bride = services.decrypt_person(cert.bride_data)
+    except ValueError as exc:
+        return JsonResponse({'error': str(exc)}, status=500)
+
+    return JsonResponse({
+        **base,
+        'encrypted': False,
         'groom': groom,
         'bride': bride,
         'imageData': cert.image_data,
-        'createdAt': cert.created_at.isoformat(),
     })

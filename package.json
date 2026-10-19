@@ -13,8 +13,11 @@
   "dependencies": {
     "@libsql/client": "^0.18.0",
     "clsx": "^2.1.1",
+    "docx": "^9.12.0",
     "dotenv": "^18.0.8",
+    "file-saver": "^2.0.5",
     "html2canvas": "^1.4.1",
+    "jspdf": "^4.2.1",
     "lucide-react": "^1.16.0",
     "qrcode": "^1.5.4",
     "react": "^19.0.0",
@@ -23,6 +26,7 @@
     "tailwind-merge": "^3.0.2"
   },
   "devDependencies": {
+    "@types/file-saver": "^2.0.7",
     "@types/node": "^22.13.4",
     "@types/qrcode": "^1.5.6",
     "@types/react": "^19.0.10",

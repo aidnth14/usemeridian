@@ -19,16 +19,27 @@ export type PersonData = Record<(typeof PERSON_FIELD_KEYS)[number], string>;
 
 export type SealTransform = { x: number; y: number; scale: number; rotation: number };
 
-export type CertificateRecord = {
+type RawCertificateBase = {
   id: string;
   key: string;
   certificateTemplate: string;
   sealTemplate: string;
   seal: SealTransform;
+  createdAt: string;
+};
+
+// What the server actually returns - either opaque ciphertext it never had
+// the key for, or (for certificates predating client-side encryption)
+// already-decrypted plaintext it decrypted itself.
+export type RawCertificateRecord =
+  | (RawCertificateBase & { encrypted: true; groomCipher: string; brideCipher: string; imageCipher: string | null })
+  | (RawCertificateBase & { encrypted: false; groom: PersonData; bride: PersonData; imageData: string | null });
+
+// What the UI works with after any necessary client-side decryption.
+export type ResolvedCertificate = RawCertificateBase & {
   groom: PersonData;
   bride: PersonData;
-  imageData?: string | null;
-  createdAt: string;
+  imageData: string | null;
 };
 
 function personFromValues(values: Record<string, string>, prefix: 'groom' | 'bride'): PersonData {
@@ -39,13 +50,8 @@ function personFromValues(values: Record<string, string>, prefix: 'groom' | 'bri
   return person;
 }
 
-export function buildCertificatePayload(values: Record<string, string>, seal: SealTransform, image?: string | null) {
-  return {
-    groom: personFromValues(values, 'groom'),
-    bride: personFromValues(values, 'bride'),
-    seal,
-    image: image ?? null,
-  };
+export function groomBrideFromValues(values: Record<string, string>) {
+  return { groom: personFromValues(values, 'groom'), bride: personFromValues(values, 'bride') };
 }
 
 // Render's free tier cold-starts after idling - a sleeping instance can take
@@ -53,9 +59,11 @@ export function buildCertificatePayload(values: Record<string, string>, seal: Se
 const CREATE_TIMEOUT_MS = 60_000;
 
 export async function createCertificate(
-  values: Record<string, string>,
+  id: string,
+  groomCipher: string,
+  brideCipher: string,
   seal: SealTransform,
-  image?: string | null
+  imageCipher?: string | null
 ) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), CREATE_TIMEOUT_MS);
@@ -65,7 +73,7 @@ export async function createCertificate(
     res = await fetch(`${API_BASE}/api/certificates/`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(buildCertificatePayload(values, seal, image)),
+      body: JSON.stringify({ id, groomCipher, brideCipher, seal, imageCipher: imageCipher ?? null }),
       signal: controller.signal,
     });
   } catch (err) {
@@ -84,19 +92,19 @@ export async function createCertificate(
   return res.json() as Promise<{ id: string; key: string; createdAt: string }>;
 }
 
-export async function getCertificate(id: string): Promise<CertificateRecord | null> {
+export async function getCertificate(id: string): Promise<RawCertificateRecord | null> {
   const res = await fetch(`${API_BASE}/api/certificates/${encodeURIComponent(id)}/`);
   if (res.status === 404) return null;
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
     throw new Error(body.error || `Failed to load certificate (${res.status})`);
   }
-  return res.json() as Promise<CertificateRecord>;
+  return res.json() as Promise<RawCertificateRecord>;
 }
 
-// Flattens a fetched record's groom/bride fields back into the "groom-legal-name"
+// Flattens a resolved record's groom/bride fields back into the "groom-legal-name"
 // style keys CertificateOverlay expects, so the view page can reuse it directly.
-export function flattenCertificateValues(cert: CertificateRecord): Record<string, string> {
+export function flattenCertificateValues(cert: ResolvedCertificate): Record<string, string> {
   const values: Record<string, string> = {};
   for (const key of PERSON_FIELD_KEYS) {
     values[`groom-${key}`] = cert.groom[key] ?? '';

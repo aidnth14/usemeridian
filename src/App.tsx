@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import RegistryForm from './components/RegistryForm';
+import Footer from './components/Footer';
 import { LiveCertificateOverlay } from './components/CertificateOverlay';
 import { useRegistryForm } from './context/RegistryFormContext';
 import { useContainedRect } from './hooks/useContainedRect';
@@ -107,7 +108,7 @@ export const App: React.FC = () => {
           containerRef.current = node;
           certificateNodeRef.current = node;
         }}
-        className="relative my-[15px] ml-[10px] h-48 w-[calc(100%-10px)] shrink-0 overflow-hidden md:h-[calc(100dvh-30px)] md:w-[calc(42%+25px)]"
+        className="relative my-[15px] ml-[10px] h-72 w-[calc(100%-10px)] shrink-0 overflow-hidden sm:h-80 md:h-[calc(100dvh-30px)] md:w-[calc(42%+25px)]"
       >
         <img
           key="certificate-image"
@@ -138,8 +139,11 @@ export const App: React.FC = () => {
           <LiveCertificateOverlay />
         </div>
       </div>
-      <div className="flex-1 px-6 py-[15px] sm:px-10 lg:px-14 md:h-[calc(100dvh-30px)] md:overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        <RegistryForm />
+      <div className="flex-1 md:h-[calc(100dvh-30px)] md:overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="px-6 py-[15px] sm:px-10 lg:px-14">
+          <RegistryForm />
+        </div>
+        <Footer />
       </div>
     </div>
   );

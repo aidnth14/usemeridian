@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { ChevronDown } from 'lucide-react';
 import clsx from 'clsx';
 import { useRegistryForm } from '../context/RegistryFormContext';
-import { createCertificate } from '../lib/api';
+import { createCertificate, groomBrideFromValues, SITE_URL } from '../lib/api';
+import { newSessionKey, encryptJSON, encryptString, generateCertificateId } from '../lib/crypto';
 import LoadingScreen from './LoadingScreen';
 
 type FieldProps = {
@@ -146,8 +147,10 @@ const PersonFields: React.FC<{ title: string; prefix: string }> = ({ title, pref
   </section>
 );
 
+const nextFrame = () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
 export const RegistryForm: React.FC = () => {
-  const { values, sealTransformRef, certificateNodeRef } = useRegistryForm();
+  const { values, sealTransformRef, certificateNodeRef, setPreviewMeta } = useRegistryForm();
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -173,9 +176,28 @@ export const RegistryForm: React.FC = () => {
     setError(null);
     setSubmitting(true);
     try {
+      // Pre-generate the id/key client-side so the QR code and key number can
+      // be baked into the snapshot - the server doesn't get to pick the id,
+      // since by the time it would, the image has already been captured.
+      const certId = generateCertificateId();
+      const certKey = certId.slice(-10);
+      const { key, exported } = await newSessionKey();
+      const fragment = `#k=${exported}`;
+      const shareUrl = `${SITE_URL}/cert/id.${certId}${fragment}`;
+
+      // Briefly show the real QR/key on the live editor, let it paint, capture, then hide it again.
+      setPreviewMeta({ certKey, shareUrl });
+      await nextFrame();
       const image = await captureCertificateImage();
-      const { id } = await createCertificate(values, sealTransformRef.current, image);
-      navigate(`/cert/id.${id}`);
+      setPreviewMeta(null);
+
+      const { groom, bride } = groomBrideFromValues(values);
+      const groomCipher = await encryptJSON(key, groom);
+      const brideCipher = await encryptJSON(key, bride);
+      const imageCipher = image ? await encryptString(key, image) : null;
+
+      await createCertificate(certId, groomCipher, brideCipher, sealTransformRef.current, imageCipher);
+      navigate(`/cert/id.${certId}${fragment}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
       setSubmitting(false);
