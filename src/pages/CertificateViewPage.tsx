@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { getCertificate, flattenCertificateValues, type CertificateRecord } from '../lib/api';
+import { getCertificate, flattenCertificateValues, SITE_URL, type CertificateRecord } from '../lib/api';
 import CertificateOverlay from '../components/CertificateOverlay';
 import { useContainedRect } from '../hooks/useContainedRect';
 import { useElementSize } from '../hooks/useElementSize';
@@ -72,7 +72,7 @@ export const CertificateViewPage: React.FC = () => {
           <CertificateOverlay
             values={values}
             certKey={cert.key}
-            shareUrl={`${window.location.origin}/cert/id.${cert.id}`}
+            shareUrl={`${SITE_URL}/cert/id.${cert.id}`}
           />
         </div>
       </div>

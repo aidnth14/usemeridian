@@ -5,6 +5,11 @@
 // in dev keeps using Vite's /api proxy to the local backend.
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? '';
 
+// Share links/QR codes always point at the canonical production domain, even
+// when a certificate is generated from local dev - otherwise a link created
+// while testing locally would only resolve on that machine.
+export const SITE_URL = 'https://lameridian.vercel.app';
+
 export const PERSON_FIELD_KEYS = [
   'legal-name', 'sex', 'birthdate', 'nationality', 'religion', 'father-name',
   'email', 'phone', 'address-1', 'address-2', 'postal-code', 'signature',

@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://usemeridian-eight.vercel.app/sitemap.xml
+Sitemap: https://lameridian.vercel.app/sitemap.xml

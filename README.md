@@ -2,8 +2,7 @@
 
 > The precision interface — Unified TypeScript Frontend, Django Backend, and Turso libSQL Cloud Database.
 
-- Production URL: **[usemeridian-eight.vercel.app](https://usemeridian-eight.vercel.app)**
-- Secondary Domain: **[use-meridian.vercel.app](https://use-meridian.vercel.app)**
+- Production URL: **[lameridian.vercel.app](https://lameridian.vercel.app)**
 - GitHub Repository: **[aidnth14/usemeridian](https://github.com/aidnth14/usemeridian)**
 
 ---
