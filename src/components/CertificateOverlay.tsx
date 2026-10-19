@@ -14,6 +14,8 @@ const Blank: React.FC<{ value?: string; placeholder: string }> = ({ value, place
   );
 };
 
+// All sizes here are in the certificate's fixed design space (see CertificateStage) -
+// no responsive breakpoints, because the whole certificate is scaled as a unit.
 export const CertificateOverlay: React.FC<{ values: Values; certKey?: string; shareUrl?: string }> = ({
   values,
   certKey,
@@ -25,28 +27,28 @@ export const CertificateOverlay: React.FC<{ values: Values; certKey?: string; sh
 
   return (
     <div
-      className="pointer-events-none absolute inset-0 flex select-none flex-col px-[8%] pb-[12%]"
+      className="pointer-events-none absolute inset-0 flex select-none flex-col px-[9%] pb-[11%]"
       style={{ fontFamily: "'Malevice Inkbleed', serif" }}
     >
+      {shareUrl && (
+        <div className="absolute left-[6.5%] top-[5%] text-slate-700">
+          <QRCodeSvg value={shareUrl} size={48} />
+        </div>
+      )}
       {certKey && (
-        <p className="absolute right-[6%] top-[4%] font-mono text-[6.5px] tracking-wide text-slate-400 sm:text-[7.5px]">
+        <p className="absolute right-[6.5%] top-[5.5%] font-mono text-[9px] tracking-wide text-slate-400">
           No. {certKey}
         </p>
       )}
-      {shareUrl && (
-        <div className="absolute left-0 top-0 text-slate-700">
-          <QRCodeSvg value={shareUrl} size={34} className="sm:h-10 sm:w-10" />
-        </div>
-      )}
 
-      <div className="flex shrink-0 flex-col items-center pt-[calc(34px+50px)] text-center sm:pt-[calc(40px+50px)]">
-        <p className="text-[9px] uppercase tracking-[0.25em] text-slate-400 sm:text-[11px]">Meridian Registry</p>
-        <p className="mt-[2%] text-[16px] font-semibold uppercase tracking-wide text-slate-700 sm:text-[20px]">
+      <div className="flex shrink-0 flex-col items-center pt-[74px] text-center">
+        <p className="text-[12px] uppercase tracking-[0.25em] text-slate-400">Meridian Registry</p>
+        <p className="mt-[2%] text-[23px] font-semibold uppercase tracking-wide text-slate-700">
           Certificate of Marriage
         </p>
       </div>
 
-      <p className="mt-[5%] text-left text-[9px] leading-[1.75] text-slate-600 sm:text-[11px]">
+      <p className="mt-[6%] text-left text-[12px] leading-[1.75] text-slate-600">
         This is to certify that <Blank value={v('groom-legal-name')} placeholder="groom's legal name" />,{' '}
         <Blank value={v('groom-sex')} placeholder="sex" />, born{' '}
         <Blank value={v('groom-birthdate')} placeholder="birthdate" />, of{' '}
@@ -63,7 +65,7 @@ export const CertificateOverlay: React.FC<{ values: Values; certKey?: string; sh
       </p>
 
       <div className="mt-auto flex flex-col gap-[5%]">
-        <div className="text-left text-[9px] leading-[1.75] text-slate-600 sm:text-[11px]">
+        <div className="text-left text-[12px] leading-[1.75] text-slate-600">
           <p>
             The groom resides at <Blank value={v('groom-address-1')} placeholder="address line 1" />,{' '}
             <Blank value={v('groom-address-2')} placeholder="address line 2" />,{' '}
@@ -83,25 +85,29 @@ export const CertificateOverlay: React.FC<{ values: Values; certKey?: string; sh
         <div className="grid grid-cols-2 gap-x-[6%] text-left">
           <div className="border-t border-slate-400 pt-[10px]">
             <p
-              className={groomSignature?.trim() ? 'overflow-visible whitespace-nowrap text-[20px] leading-[1.4] text-slate-800 sm:text-[24px]' : 'text-[10px] italic text-slate-300 sm:text-[12px]'}
+              className={
+                groomSignature?.trim()
+                  ? 'overflow-visible whitespace-nowrap text-[26px] leading-[1.4] text-slate-800'
+                  : 'text-[13px] italic text-slate-300'
+              }
               style={groomSignature?.trim() ? { fontFamily: "'Dalton White', cursive" } : undefined}
             >
               {groomSignature?.trim() || 'Groom signature'}
             </p>
-            <p className="mt-[10px] text-[7.5px] uppercase tracking-wide text-slate-500 sm:text-[8.5px]">
-              Signature of Groom
-            </p>
+            <p className="mt-[10px] text-[9px] uppercase tracking-wide text-slate-500">Signature of Groom</p>
           </div>
           <div className="border-t border-slate-400 pt-[10px]">
             <p
-              className={brideSignature?.trim() ? 'overflow-visible whitespace-nowrap text-[20px] leading-[1.4] text-slate-800 sm:text-[24px]' : 'text-[10px] italic text-slate-300 sm:text-[12px]'}
+              className={
+                brideSignature?.trim()
+                  ? 'overflow-visible whitespace-nowrap text-[26px] leading-[1.4] text-slate-800'
+                  : 'text-[13px] italic text-slate-300'
+              }
               style={brideSignature?.trim() ? { fontFamily: "'Dalton White', cursive" } : undefined}
             >
               {brideSignature?.trim() || 'Bride signature'}
             </p>
-            <p className="mt-[10px] text-[7.5px] uppercase tracking-wide text-slate-500 sm:text-[8.5px]">
-              Signature of Bride
-            </p>
+            <p className="mt-[10px] text-[9px] uppercase tracking-wide text-slate-500">Signature of Bride</p>
           </div>
         </div>
       </div>

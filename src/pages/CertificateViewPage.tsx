@@ -10,11 +10,9 @@ import {
 import { importKey, decryptJSON, decryptString } from '../lib/crypto';
 import { downloadAsPng, downloadAsPdf, downloadAsDocx } from '../lib/downloads';
 import CertificateOverlay from '../components/CertificateOverlay';
+import { CertificateStage, BASE_W, BASE_H } from '../components/CertificateStage';
 import Footer from '../components/Footer';
-import { useContainedRect } from '../hooks/useContainedRect';
 import { useElementSize } from '../hooks/useElementSize';
-
-const CERTIFICATE_ASPECT = 760 / 976;
 
 async function resolveCertificate(raw: RawCertificateRecord): Promise<ResolvedCertificate> {
   const { id, key, certificateTemplate, sealTemplate, seal, createdAt } = raw;
@@ -51,8 +49,7 @@ export const CertificateViewPage: React.FC = () => {
   const [downloading, setDownloading] = useState<'png' | 'pdf' | 'docx' | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const captureRef = useRef<HTMLDivElement>(null);
-  const certificateRect = useContainedRect(containerRef, CERTIFICATE_ASPECT);
-  const containerSize = useElementSize(containerRef);
+  const size = useElementSize(containerRef);
 
   useEffect(() => {
     if (!idnum) return;
@@ -71,24 +68,24 @@ export const CertificateViewPage: React.FC = () => {
     return <StatusPage message="No certificate found for this link." tone="neutral" />;
   }
 
-  // Deliberately NOT early-returning while cert is still loading (undefined) -
-  // the container below must mount on the very first render so containerRef
-  // is attached before useContainedRect's effect runs. Early-returning here
-  // was the actual cause of a nasty bug: the effect would run once against a
-  // null ref, then never again, permanently freezing the overlay at 0x0.
   const values = cert ? flattenCertificateValues(cert) : {};
-  const sealX = cert ? cert.seal.x * (containerSize.width / 2) : 0;
-  const sealY = cert ? cert.seal.y * (containerSize.height / 2) : 0;
+  const scale = size.width > 0 ? size.width / BASE_W : 0;
 
   const handleDownload = async (format: 'png' | 'pdf' | 'docx') => {
-    if (!captureRef.current) return;
+    if (!captureRef.current || !cert) return;
     setDownloading(format);
     try {
       await document.fonts.ready;
       const { default: html2canvas } = await import('html2canvas');
-      const canvas = await html2canvas(captureRef.current, { backgroundColor: null, useCORS: true, scale: 2 });
+      // Capture the hidden scale=1 (760x976) copy at 2x for a crisp ~1520px
+      // export, regardless of how small the on-screen certificate is.
+      const canvas = await html2canvas(captureRef.current, {
+        backgroundColor: null,
+        useCORS: true,
+        scale: 2,
+      });
       const dataUrl = canvas.toDataURL('image/png');
-      const filename = `meridian-certificate-${cert?.key ?? 'download'}`;
+      const filename = `meridian-certificate-${cert.key}`;
       if (format === 'png') await downloadAsPng(dataUrl, `${filename}.png`);
       if (format === 'pdf') await downloadAsPdf(dataUrl, `${filename}.pdf`);
       if (format === 'docx') await downloadAsDocx(dataUrl, `${filename}.docx`);
@@ -103,44 +100,37 @@ export const CertificateViewPage: React.FC = () => {
     <div className="flex min-h-dvh w-full flex-col items-center gap-6 bg-white px-4 py-6 sm:items-start sm:px-10 sm:py-10">
       <div
         ref={containerRef}
-        className="relative aspect-[760/976] w-full max-w-[320px] overflow-hidden sm:max-w-[380px] md:max-w-[420px]"
+        className="relative aspect-[760/976] w-full max-w-[min(92vw,440px)] overflow-hidden"
       >
-        <div ref={captureRef} className="absolute inset-0">
-          <img
-            src="/assets/certificate-bg.webp"
-            alt="Meridian certificate"
-            draggable={false}
-            className="absolute inset-0 h-full w-full select-none object-contain"
+        {scale > 0 && cert && (
+          <CertificateStage
+            left={0}
+            top={0}
+            scale={scale}
+            seal={cert.seal}
+            overlay={
+              <CertificateOverlay values={values} certKey={cert.key} shareUrl={`${SITE_URL}/cert/id.${cert.id}`} />
+            }
           />
-          {cert && (
-            <img
-              src="/assets/seal.webp"
-              alt="Meridian registry seal"
-              draggable={false}
-              className="absolute left-1/2 top-1/2 h-24 w-24 select-none opacity-65 md:h-32 md:w-32"
-              style={{
-                transform: `translate(-50%, -50%) translate(${sealX}px, ${sealY}px) rotate(${cert.seal.rotation}deg) scale(${cert.seal.scale})`,
-              }}
-            />
-          )}
-          <div
-            className="pointer-events-none"
-            style={{
-              position: 'absolute',
-              top: certificateRect.top,
-              left: certificateRect.left,
-              width: certificateRect.width,
-              height: certificateRect.height,
-            }}
-          >
-            <CertificateOverlay
-              values={values}
-              certKey={cert?.key}
-              shareUrl={cert ? `${SITE_URL}/cert/id.${cert.id}` : undefined}
+        )}
+      </div>
+
+      {/* Hidden full-resolution copy captured for downloads. */}
+      {cert && (
+        <div aria-hidden className="pointer-events-none fixed left-0 top-0 -z-10 h-0 w-0 overflow-hidden">
+          <div ref={captureRef} className="relative" style={{ width: BASE_W, height: BASE_H }}>
+            <CertificateStage
+              left={0}
+              top={0}
+              scale={1}
+              seal={cert.seal}
+              overlay={
+                <CertificateOverlay values={values} certKey={cert.key} shareUrl={`${SITE_URL}/cert/id.${cert.id}`} />
+              }
             />
           </div>
         </div>
-      </div>
+      )}
 
       {cert && (
         <div className="flex flex-wrap gap-2">
@@ -157,6 +147,8 @@ export const CertificateViewPage: React.FC = () => {
           ))}
         </div>
       )}
+
+      {cert === undefined && !error && <p className="text-sm text-zinc-500">Loading certificate...</p>}
 
       <Link to="/" className="text-xs text-zinc-400 underline underline-offset-2 hover:text-zinc-600">
         Generate your own certificate
