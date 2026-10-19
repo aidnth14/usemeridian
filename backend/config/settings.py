@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -26,6 +27,16 @@ SECRET_KEY = 'django-insecure-f!ezdz^6&15)1=#*7&-u4()6n2q^m6-60mu7uyc$8t@7fnmd17
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
+
+# Turso / libSQL Configuration
+TURSO_DATABASE_URL = os.getenv(
+    'TURSO_DATABASE_URL', 
+    'libsql://usemeridian-usemeridian.aws-us-east-1.turso.io'
+)
+TURSO_AUTH_TOKEN = os.getenv(
+    'TURSO_AUTH_TOKEN', 
+    'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3OTI0MTIwODIsImlkIjoiMDFhMTU0MTUtOWUwMS03MWE1LTljNGUtZjNhMzU3NWNmMjg5Iiwia2lkIjoiZzBteG5aX0M1azMwU0NnTmRFWjg4R2FRYUdRUTNMVG5Gb2ZVak5jNUtVdyIsInJpZCI6IjExNzkwNzRhLTY3MDktNDYyMy05NDI1LWQ5MTViNmFjNzBhZCJ9.76E8JWmjq5F4BQzFzRdb90oydhzJlBGgz_zV09ZVVvhu7_iBHwmH6oWv61xxSNOAdhzKO7WAoA0-BKZmV2KbBQ'
+)
 
 
 # Application definition
