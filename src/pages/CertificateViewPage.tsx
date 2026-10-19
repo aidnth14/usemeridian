@@ -44,37 +44,50 @@ export const CertificateViewPage: React.FC = () => {
   return (
     <div className="flex min-h-dvh w-full flex-col items-center justify-center gap-6 bg-white px-4 py-10">
       <div ref={containerRef} className="relative aspect-[760/976] w-full max-w-[420px] overflow-hidden">
-        <img
-          src="/assets/certificate-bg.webp"
-          alt="Meridian certificate"
-          draggable={false}
-          className="absolute inset-0 h-full w-full select-none object-contain"
-        />
-        <img
-          src="/assets/seal.webp"
-          alt="Meridian registry seal"
-          draggable={false}
-          className="absolute left-1/2 top-1/2 h-24 w-24 select-none opacity-65 md:h-32 md:w-32"
-          style={{
-            transform: `translate(-50%, -50%) translate(${sealX}px, ${sealY}px) rotate(${cert.seal.rotation}deg) scale(${cert.seal.scale})`,
-          }}
-        />
-        <div
-          className="pointer-events-none"
-          style={{
-            position: 'absolute',
-            top: certificateRect.top,
-            left: certificateRect.left,
-            width: certificateRect.width,
-            height: certificateRect.height,
-          }}
-        >
-          <CertificateOverlay
-            values={values}
-            certKey={cert.key}
-            shareUrl={`${SITE_URL}/cert/id.${cert.id}`}
+        {cert.imageData ? (
+          // Exactly what the editor rendered at generation time - sidesteps any
+          // bugs in reconstructing the certificate live from stored fields.
+          <img
+            src={cert.imageData}
+            alt="Meridian marriage certificate"
+            draggable={false}
+            className="absolute inset-0 h-full w-full select-none object-contain"
           />
-        </div>
+        ) : (
+          <>
+            <img
+              src="/assets/certificate-bg.webp"
+              alt="Meridian certificate"
+              draggable={false}
+              className="absolute inset-0 h-full w-full select-none object-contain"
+            />
+            <img
+              src="/assets/seal.webp"
+              alt="Meridian registry seal"
+              draggable={false}
+              className="absolute left-1/2 top-1/2 h-24 w-24 select-none opacity-65 md:h-32 md:w-32"
+              style={{
+                transform: `translate(-50%, -50%) translate(${sealX}px, ${sealY}px) rotate(${cert.seal.rotation}deg) scale(${cert.seal.scale})`,
+              }}
+            />
+            <div
+              className="pointer-events-none"
+              style={{
+                position: 'absolute',
+                top: certificateRect.top,
+                left: certificateRect.left,
+                width: certificateRect.width,
+                height: certificateRect.height,
+              }}
+            >
+              <CertificateOverlay
+                values={values}
+                certKey={cert.key}
+                shareUrl={`${SITE_URL}/cert/id.${cert.id}`}
+              />
+            </div>
+          </>
+        )}
       </div>
       <Link to="/" className="text-xs text-zinc-400 underline underline-offset-2 hover:text-zinc-600">
         Generate your own certificate

@@ -27,6 +27,7 @@ export type CertificateRecord = {
   seal: SealTransform;
   groom: PersonData;
   bride: PersonData;
+  imageData?: string | null;
   createdAt: string;
 };
 
@@ -38,11 +39,12 @@ function personFromValues(values: Record<string, string>, prefix: 'groom' | 'bri
   return person;
 }
 
-export function buildCertificatePayload(values: Record<string, string>, seal: SealTransform) {
+export function buildCertificatePayload(values: Record<string, string>, seal: SealTransform, image?: string | null) {
   return {
     groom: personFromValues(values, 'groom'),
     bride: personFromValues(values, 'bride'),
     seal,
+    image: image ?? null,
   };
 }
 
@@ -50,7 +52,11 @@ export function buildCertificatePayload(values: Record<string, string>, seal: Se
 // ~30-50s to wake. 60s gives real cold starts room without hanging forever.
 const CREATE_TIMEOUT_MS = 60_000;
 
-export async function createCertificate(values: Record<string, string>, seal: SealTransform) {
+export async function createCertificate(
+  values: Record<string, string>,
+  seal: SealTransform,
+  image?: string | null
+) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), CREATE_TIMEOUT_MS);
 
@@ -59,7 +65,7 @@ export async function createCertificate(values: Record<string, string>, seal: Se
     res = await fetch(`${API_BASE}/api/certificates/`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(buildCertificatePayload(values, seal)),
+      body: JSON.stringify(buildCertificatePayload(values, seal, image)),
       signal: controller.signal,
     });
   } catch (err) {

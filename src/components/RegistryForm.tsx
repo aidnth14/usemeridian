@@ -147,17 +147,34 @@ const PersonFields: React.FC<{ title: string; prefix: string }> = ({ title, pref
 );
 
 export const RegistryForm: React.FC = () => {
-  const { values, sealTransformRef } = useRegistryForm();
+  const { values, sealTransformRef, certificateNodeRef } = useRegistryForm();
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const captureCertificateImage = async (): Promise<string | null> => {
+    const node = certificateNodeRef.current;
+    if (!node) return null;
+    try {
+      // Wait for custom @font-face fonts to finish loading - otherwise html2canvas
+      // can rasterize with the fallback font still showing.
+      await document.fonts.ready;
+      const { default: html2canvas } = await import('html2canvas');
+      const canvas = await html2canvas(node, { backgroundColor: null, useCORS: true, scale: 2 });
+      return canvas.toDataURL('image/webp', 0.85);
+    } catch (err) {
+      console.error('Certificate snapshot failed, continuing without it', err);
+      return null;
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setSubmitting(true);
     try {
-      const { id } = await createCertificate(values, sealTransformRef.current);
+      const image = await captureCertificateImage();
+      const { id } = await createCertificate(values, sealTransformRef.current, image);
       navigate(`/cert/id.${id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');

@@ -2,11 +2,10 @@ from django.db import models
 
 
 class Certificate(models.Model):
-    """Container 1: everything needed to redraw a certificate on demand.
-
-    No rendered image is ever stored - only asset references, the seal's
-    transform on the certificate, and the (encrypted) bride/groom data.
-    The client reassembles the visual from this at view time.
+    """Container 1: everything needed to redraw a certificate on demand, plus
+    a rasterized snapshot of what the editor actually rendered at generation
+    time. The structured fields remain the source of truth; image_data exists
+    so the view page has a WYSIWYG fallback that can't drift from live-render bugs.
     """
 
     id = models.CharField(primary_key=True, max_length=32, editable=False)
@@ -23,6 +22,10 @@ class Certificate(models.Model):
     # Fernet-encrypted JSON blobs of the groom/bride fields.
     groom_data = models.TextField()
     bride_data = models.TextField()
+
+    # data: URL (webp), captured client-side via html2canvas at generation time.
+    # Nullable - certificates created before this field existed have none.
+    image_data = models.TextField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 

@@ -16,7 +16,7 @@ export const App: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const sealRef = useRef<HTMLImageElement>(null);
   const certificateRect = useContainedRect(containerRef, CERTIFICATE_ASPECT);
-  const { sealTransformRef } = useRegistryForm();
+  const { sealTransformRef, certificateNodeRef } = useRegistryForm();
 
   useEffect(() => {
     const container = containerRef.current;
@@ -103,7 +103,10 @@ export const App: React.FC = () => {
   return (
     <div className="flex min-h-dvh w-full flex-col bg-white md:h-dvh md:flex-row md:overflow-hidden">
       <div
-        ref={containerRef}
+        ref={(node) => {
+          containerRef.current = node;
+          certificateNodeRef.current = node;
+        }}
         className="relative my-[15px] ml-[10px] h-48 w-[calc(100%-10px)] shrink-0 overflow-hidden md:h-[calc(100dvh-30px)] md:w-[calc(42%+25px)]"
       >
         <img

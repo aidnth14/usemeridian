@@ -20,8 +20,14 @@ def create_certificate(request):
     groom = payload.get('groom')
     bride = payload.get('bride')
     seal = payload.get('seal') or {}
+    image = payload.get('image')
     if not isinstance(groom, dict) or not isinstance(bride, dict):
         return JsonResponse({'error': 'groom and bride objects are required'}, status=400)
+    if image is not None:
+        if not isinstance(image, str) or not image.startswith('data:image/'):
+            return JsonResponse({'error': 'image must be a data: URL'}, status=400)
+        if len(image) > 3_000_000:
+            return JsonResponse({'error': 'image too large'}, status=400)
 
     cert = None
     for _ in range(5):
@@ -36,6 +42,7 @@ def create_certificate(request):
                 seal_rotation=float(seal.get('rotation', 0)),
                 groom_data=services.encrypt_person(groom),
                 bride_data=services.encrypt_person(bride),
+                image_data=image,
             )
             break
         except IntegrityError:
@@ -79,5 +86,6 @@ def get_certificate(request, cert_id):
         },
         'groom': groom,
         'bride': bride,
+        'imageData': cert.image_data,
         'createdAt': cert.created_at.isoformat(),
     })
