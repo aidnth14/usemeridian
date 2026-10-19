@@ -77,9 +77,12 @@ export const CertificateOverlay: React.FC<{ values: Values; certKey?: string; sh
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-x-[6%] text-left text-[10px] sm:text-[12px]">
+        <div className="grid grid-cols-2 gap-x-[6%] text-left">
           <div className="border-t border-slate-400 pt-[4px]">
-            <p className={clsx('italic', groomSignature?.trim() ? 'text-slate-800' : 'text-slate-300')}>
+            <p
+              className={groomSignature?.trim() ? 'text-[16px] leading-[1.4] text-slate-800 sm:text-[19px]' : 'text-[10px] italic text-slate-300 sm:text-[12px]'}
+              style={groomSignature?.trim() ? { fontFamily: "'Dalton White', cursive" } : undefined}
+            >
               {groomSignature?.trim() || 'Groom signature'}
             </p>
             <p className="mt-[3px] text-[7.5px] uppercase tracking-wide text-slate-400 sm:text-[8.5px]">
@@ -87,7 +90,10 @@ export const CertificateOverlay: React.FC<{ values: Values; certKey?: string; sh
             </p>
           </div>
           <div className="border-t border-slate-400 pt-[4px]">
-            <p className={clsx('italic', brideSignature?.trim() ? 'text-slate-800' : 'text-slate-300')}>
+            <p
+              className={brideSignature?.trim() ? 'text-[16px] leading-[1.4] text-slate-800 sm:text-[19px]' : 'text-[10px] italic text-slate-300 sm:text-[12px]'}
+              style={brideSignature?.trim() ? { fontFamily: "'Dalton White', cursive" } : undefined}
+            >
               {brideSignature?.trim() || 'Bride signature'}
             </p>
             <p className="mt-[3px] text-[7.5px] uppercase tracking-wide text-slate-400 sm:text-[8.5px]">
