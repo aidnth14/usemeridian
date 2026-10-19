@@ -1,3 +1,10 @@
+// Vercel reserves /api/* for its own Serverless Functions convention and
+// blocks rewrites to an external domain there (confirmed: vercel.json rewrite
+// to the Render backend 404'd at the platform level). Calling Render directly
+// instead - Django already allows it via CORS_ALLOW_ALL_ORIGINS. Empty string
+// in dev keeps using Vite's /api proxy to the local backend.
+const API_BASE = import.meta.env.VITE_API_BASE_URL ?? '';
+
 export const PERSON_FIELD_KEYS = [
   'legal-name', 'sex', 'birthdate', 'nationality', 'religion', 'father-name',
   'email', 'phone', 'address-1', 'address-2', 'postal-code', 'signature',
@@ -44,7 +51,7 @@ export async function createCertificate(values: Record<string, string>, seal: Se
 
   let res: Response;
   try {
-    res = await fetch('/api/certificates/', {
+    res = await fetch(`${API_BASE}/api/certificates/`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(buildCertificatePayload(values, seal)),
@@ -67,7 +74,7 @@ export async function createCertificate(values: Record<string, string>, seal: Se
 }
 
 export async function getCertificate(id: string): Promise<CertificateRecord | null> {
-  const res = await fetch(`/api/certificates/${encodeURIComponent(id)}/`);
+  const res = await fetch(`${API_BASE}/api/certificates/${encodeURIComponent(id)}/`);
   if (res.status === 404) return null;
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));

@@ -3,7 +3,6 @@
   "framework": "vite",
   "cleanUrls": true,
   "rewrites": [
-    { "source": "/api/:path*", "destination": "https://usemeridian-api.onrender.com/api/:path*" },
     { "source": "/((?!assets/).*)", "destination": "/index.html" }
   ]
 }
