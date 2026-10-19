@@ -1,4 +1,4 @@
-import { createClient } from '@libsql/client/web';
+import { createClient } from '@libsql/client';
 
 export const TURSO_DATABASE_URL = 
   import.meta.env.VITE_TURSO_DATABASE_URL || 
