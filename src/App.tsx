@@ -2,7 +2,7 @@ import React from 'react';
 
 export const App: React.FC = () => {
   return (
-    <div className="min-h-screen bg-[#080a0f] w-full" />
+    <div className="min-h-screen bg-white w-full" />
   );
 };
 
