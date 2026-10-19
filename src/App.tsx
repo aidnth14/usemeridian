@@ -113,7 +113,17 @@ export const App: React.FC = () => {
           draggable={false}
           className="absolute inset-0 h-full w-full select-none object-contain"
         />
+        <img
+          key="seal-image"
+          ref={sealRef}
+          src="/assets/seal.webp"
+          alt="Meridian registry seal"
+          draggable={false}
+          className="absolute left-1/2 top-1/2 h-24 w-24 touch-none select-none cursor-grab opacity-65 md:h-32 md:w-32"
+          style={{ transform: 'translate(-50%, -50%)' }}
+        />
         <div
+          className="pointer-events-none"
           style={{
             position: 'absolute',
             top: certificateRect.top,
@@ -124,15 +134,6 @@ export const App: React.FC = () => {
         >
           <LiveCertificateOverlay />
         </div>
-        <img
-          key="seal-image"
-          ref={sealRef}
-          src="/assets/seal.webp"
-          alt="Meridian registry seal"
-          draggable={false}
-          className="absolute left-1/2 top-1/2 h-24 w-24 touch-none select-none cursor-grab md:h-32 md:w-32"
-          style={{ transform: 'translate(-50%, -50%)' }}
-        />
       </div>
       <div className="flex-1 px-6 py-[15px] sm:px-10 lg:px-14 md:h-[calc(100dvh-30px)] md:overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <RegistryForm />

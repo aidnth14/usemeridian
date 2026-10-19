@@ -176,7 +176,7 @@ export const RegistryForm: React.FC = () => {
       <button
         type="submit"
         disabled={submitting}
-        className="flex w-full items-center justify-center gap-2 rounded-md bg-zinc-900 px-6 py-3 text-sm font-medium text-white transition-colors duration-200 ease-out hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-60"
+        className="flex w-full items-center justify-center gap-2 rounded-md bg-zinc-900 px-6 py-3 text-sm font-semibold text-white transition-colors duration-200 ease-out hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-60"
       >
         <img src="/assets/gavel-white.png" alt="" className="h-4 w-4" />
         {submitting ? 'Generating...' : 'Generate Certificate'}

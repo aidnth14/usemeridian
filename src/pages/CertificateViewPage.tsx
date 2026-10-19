@@ -49,7 +49,17 @@ export const CertificateViewPage: React.FC = () => {
           draggable={false}
           className="absolute inset-0 h-full w-full select-none object-contain"
         />
+        <img
+          src="/assets/seal.webp"
+          alt="Meridian registry seal"
+          draggable={false}
+          className="absolute left-1/2 top-1/2 h-24 w-24 select-none opacity-65 md:h-32 md:w-32"
+          style={{
+            transform: `translate(-50%, -50%) translate(${sealX}px, ${sealY}px) rotate(${cert.seal.rotation}deg) scale(${cert.seal.scale})`,
+          }}
+        />
         <div
+          className="pointer-events-none"
           style={{
             position: 'absolute',
             top: certificateRect.top,
@@ -64,15 +74,6 @@ export const CertificateViewPage: React.FC = () => {
             shareUrl={`${window.location.origin}/cert/id.${cert.id}`}
           />
         </div>
-        <img
-          src="/assets/seal.webp"
-          alt="Meridian registry seal"
-          draggable={false}
-          className="absolute left-1/2 top-1/2 h-24 w-24 select-none md:h-32 md:w-32"
-          style={{
-            transform: `translate(-50%, -50%) translate(${sealX}px, ${sealY}px) rotate(${cert.seal.rotation}deg) scale(${cert.seal.scale})`,
-          }}
-        />
       </div>
       <Link to="/" className="text-xs text-zinc-400 underline underline-offset-2 hover:text-zinc-600">
         Generate your own certificate

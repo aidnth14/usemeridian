@@ -24,7 +24,10 @@ export const CertificateOverlay: React.FC<{ values: Values; certKey?: string; sh
   const brideSignature = v('bride-signature');
 
   return (
-    <div className="pointer-events-none absolute inset-0 flex select-none flex-col px-[8%] pt-[10%] pb-[5%] font-serif">
+    <div
+      className="pointer-events-none absolute inset-0 flex select-none flex-col px-[8%] pt-[10%] pb-[12%]"
+      style={{ fontFamily: "'Malevice Inkbleed', serif" }}
+    >
       {certKey && (
         <p className="absolute right-[6%] top-[4%] font-mono text-[6.5px] tracking-wide text-slate-400 sm:text-[7.5px]">
           No. {certKey}
@@ -78,25 +81,25 @@ export const CertificateOverlay: React.FC<{ values: Values; certKey?: string; sh
         </div>
 
         <div className="grid grid-cols-2 gap-x-[6%] text-left">
-          <div className="border-t border-slate-400 pt-[4px]">
+          <div className="border-t border-slate-400 pt-[10px]">
             <p
-              className={groomSignature?.trim() ? 'text-[16px] leading-[1.4] text-slate-800 sm:text-[19px]' : 'text-[10px] italic text-slate-300 sm:text-[12px]'}
+              className={groomSignature?.trim() ? 'truncate text-[28px] leading-[1.3] text-slate-800 sm:text-[34px]' : 'text-[10px] italic text-slate-300 sm:text-[12px]'}
               style={groomSignature?.trim() ? { fontFamily: "'Dalton White', cursive" } : undefined}
             >
               {groomSignature?.trim() || 'Groom signature'}
             </p>
-            <p className="mt-[3px] text-[7.5px] uppercase tracking-wide text-slate-400 sm:text-[8.5px]">
+            <p className="mt-[10px] text-[7.5px] uppercase tracking-wide text-slate-500 sm:text-[8.5px]">
               Signature of Groom
             </p>
           </div>
-          <div className="border-t border-slate-400 pt-[4px]">
+          <div className="border-t border-slate-400 pt-[10px]">
             <p
-              className={brideSignature?.trim() ? 'text-[16px] leading-[1.4] text-slate-800 sm:text-[19px]' : 'text-[10px] italic text-slate-300 sm:text-[12px]'}
+              className={brideSignature?.trim() ? 'truncate text-[28px] leading-[1.3] text-slate-800 sm:text-[34px]' : 'text-[10px] italic text-slate-300 sm:text-[12px]'}
               style={brideSignature?.trim() ? { fontFamily: "'Dalton White', cursive" } : undefined}
             >
               {brideSignature?.trim() || 'Bride signature'}
             </p>
-            <p className="mt-[3px] text-[7.5px] uppercase tracking-wide text-slate-400 sm:text-[8.5px]">
+            <p className="mt-[10px] text-[7.5px] uppercase tracking-wide text-slate-500 sm:text-[8.5px]">
               Signature of Bride
             </p>
           </div>
