@@ -18,6 +18,7 @@ __pycache__/
 # Build outputs
 dist/
 build/
+backend/staticfiles/
 
 # Vercel
 .vercel

@@ -4,6 +4,7 @@ import { ChevronDown } from 'lucide-react';
 import clsx from 'clsx';
 import { useRegistryForm } from '../context/RegistryFormContext';
 import { createCertificate } from '../lib/api';
+import LoadingScreen from './LoadingScreen';
 
 type FieldProps = {
   id: string;
@@ -175,10 +176,18 @@ export const RegistryForm: React.FC = () => {
       <button
         type="submit"
         disabled={submitting}
-        className="w-full rounded-md bg-zinc-900 px-6 py-3 text-sm font-medium text-white transition-colors duration-200 ease-out hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-60"
+        className="flex w-full items-center justify-center gap-2 rounded-md bg-zinc-900 px-6 py-3 text-sm font-medium text-white transition-colors duration-200 ease-out hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-60"
       >
+        <img src="/assets/gavel-white.png" alt="" className="h-4 w-4" />
         {submitting ? 'Generating...' : 'Generate Certificate'}
       </button>
+
+      {submitting && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-3 bg-white">
+          <LoadingScreen />
+          <p className="text-xs text-zinc-400">Sealing your certificate...</p>
+        </div>
+      )}
     </form>
   );
 };

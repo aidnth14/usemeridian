@@ -34,12 +34,31 @@ export function buildCertificatePayload(values: Record<string, string>, seal: Se
   };
 }
 
+// Render's free tier cold-starts after idling - a sleeping instance can take
+// ~30-50s to wake. 60s gives real cold starts room without hanging forever.
+const CREATE_TIMEOUT_MS = 60_000;
+
 export async function createCertificate(values: Record<string, string>, seal: SealTransform) {
-  const res = await fetch('/api/certificates/', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(buildCertificatePayload(values, seal)),
-  });
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), CREATE_TIMEOUT_MS);
+
+  let res: Response;
+  try {
+    res = await fetch('/api/certificates/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(buildCertificatePayload(values, seal)),
+      signal: controller.signal,
+    });
+  } catch (err) {
+    if (err instanceof DOMException && err.name === 'AbortError') {
+      throw new Error('The server is taking too long to respond. Please try again in a moment.');
+    }
+    throw err;
+  } finally {
+    clearTimeout(timeout);
+  }
+
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
     throw new Error(body.error || `Failed to create certificate (${res.status})`);

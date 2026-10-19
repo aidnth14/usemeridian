@@ -13,25 +13,27 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 import os
 from pathlib import Path
 
+import dj_database_url
 from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# The .env file lives at the repo root, one level above backend/.
+# The .env file lives at the repo root, one level above backend/. On Render,
+# env vars come from the dashboard/render.yaml instead - load_dotenv() is a
+# no-op there since there's no .env file to find.
 load_dotenv(BASE_DIR.parent / '.env')
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
-
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-f!ezdz^6&15)1=#*7&-u4()6n2q^m6-60mu7uyc$8t@7fnmd17'
+# Falls back to an insecure dev-only key so `manage.py runserver` keeps
+# working locally without extra setup; Render sets a real SECRET_KEY env var.
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-f!ezdz^6&15)1=#*7&-u4()6n2q^m6-60mu7uyc$8t@7fnmd17')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [h.strip() for h in os.getenv('ALLOWED_HOSTS', '*').split(',') if h.strip()]
 
 # Turso / libSQL Configuration
 TURSO_DATABASE_URL = os.getenv(
@@ -64,6 +66,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -96,13 +99,20 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
+#
+# Local dev: falls back to sqlite (no DATABASE_URL set).
+# Render: set DATABASE_URL to a managed Postgres connection string - sqlite's
+# file would live on serverless/ephemeral disk and certificates wouldn't persist.
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+if os.getenv('DATABASE_URL'):
+    DATABASES = {'default': dj_database_url.config(conn_max_age=600)}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
 
 
 # Password validation
@@ -140,6 +150,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+STORAGES = {
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+    },
+}
 
 
 # Email
