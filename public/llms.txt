@@ -1,0 +1,9 @@
+# Meridian
+
+> The precision interface.
+
+Meridian is a minimal web application: React 19 + TypeScript + Vite frontend, Django backend, Turso libSQL cloud database. Hosted on Vercel.
+
+## Docs
+
+- [README](https://github.com/aidnth14/usemeridian/blob/main/README.md): architecture, local dev, deployment

@@ -13,8 +13,13 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# The .env file lives at the repo root, one level above backend/.
+load_dotenv(BASE_DIR.parent / '.env')
 
 
 # Quick-start development settings - unsuitable for production
@@ -34,9 +39,13 @@ TURSO_DATABASE_URL = os.getenv(
     'libsql://usemeridian-usemeridian.aws-us-east-1.turso.io'
 )
 TURSO_AUTH_TOKEN = os.getenv(
-    'TURSO_AUTH_TOKEN', 
+    'TURSO_AUTH_TOKEN',
     'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3OTI0MTIwODIsImlkIjoiMDFhMTU0MTUtOWUwMS03MWE1LTljNGUtZjNhMzU3NWNmMjg5Iiwia2lkIjoiZzBteG5aX0M1azMwU0NnTmRFWjg4R2FRYUdRUTNMVG5Gb2ZVak5jNUtVdyIsInJpZCI6IjExNzkwNzRhLTY3MDktNDYyMy05NDI1LWQ5MTViNmFjNzBhZCJ9.76E8JWmjq5F4BQzFzRdb90oydhzJlBGgz_zV09ZVVvhu7_iBHwmH6oWv61xxSNOAdhzKO7WAoA0-BKZmV2KbBQ'
 )
+
+# Symmetric key used to encrypt bride/groom PII at rest. Generate with:
+#   python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+CERTIFICATE_ENCRYPTION_KEY = os.getenv('CERTIFICATE_ENCRYPTION_KEY')
 
 
 # Application definition
@@ -49,6 +58,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',
+    'certificates',
 ]
 
 MIDDLEWARE = [
