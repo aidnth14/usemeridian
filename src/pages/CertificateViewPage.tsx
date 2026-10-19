@@ -17,7 +17,8 @@ export const CertificateViewPage: React.FC = () => {
 
   useEffect(() => {
     if (!idnum) return;
-    getCertificate(idnum)
+    const cleanId = idnum.replace(/^id\./, '');
+    getCertificate(cleanId)
       .then(setCert)
       .catch((err) => setError(err instanceof Error ? err.message : 'Failed to load certificate'));
   }, [idnum]);

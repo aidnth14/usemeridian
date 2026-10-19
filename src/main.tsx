@@ -20,7 +20,7 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
               </RegistryFormProvider>
             }
           />
-          <Route path="/cert/id.:idnum" element={<CertificateViewPage />} />
+          <Route path="/cert/:idnum" element={<CertificateViewPage />} />
         </Routes>
       </AppLoader>
     </BrowserRouter>

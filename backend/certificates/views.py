@@ -54,8 +54,9 @@ def create_certificate(request):
 
 @require_http_methods(['GET'])
 def get_certificate(request, cert_id):
+    clean_id = cert_id.removeprefix('id.')
     try:
-        cert = Certificate.objects.get(id=cert_id)
+        cert = Certificate.objects.get(id=clean_id)
     except Certificate.DoesNotExist:
         return JsonResponse({'error': 'certificate not found'}, status=404)
 

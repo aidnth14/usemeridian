@@ -25,7 +25,7 @@ export const CertificateOverlay: React.FC<{ values: Values; certKey?: string; sh
 
   return (
     <div
-      className="pointer-events-none absolute inset-0 flex select-none flex-col px-[8%] pt-[10%] pb-[12%]"
+      className="pointer-events-none absolute inset-0 flex select-none flex-col px-[8%] pb-[12%]"
       style={{ fontFamily: "'Malevice Inkbleed', serif" }}
     >
       {certKey && (
@@ -34,12 +34,12 @@ export const CertificateOverlay: React.FC<{ values: Values; certKey?: string; sh
         </p>
       )}
       {shareUrl && (
-        <div className="absolute left-[6%] top-[4%] text-slate-700">
+        <div className="absolute left-0 top-0 text-slate-700">
           <QRCodeSvg value={shareUrl} size={34} className="sm:h-10 sm:w-10" />
         </div>
       )}
 
-      <div className="flex flex-col items-center text-center">
+      <div className="flex shrink-0 flex-col items-center pt-[calc(34px+50px)] text-center sm:pt-[calc(40px+50px)]">
         <p className="text-[9px] uppercase tracking-[0.25em] text-slate-400 sm:text-[11px]">Meridian Registry</p>
         <p className="mt-[2%] text-[16px] font-semibold uppercase tracking-wide text-slate-700 sm:text-[20px]">
           Certificate of Marriage
